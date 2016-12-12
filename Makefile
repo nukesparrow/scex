@@ -3,7 +3,7 @@
 
 CFLAGS += -DDEBUG -I.
 
-LIB_OBJ = scex.o
+LIB_OBJ =
 
 EXAMPLES_OBJ = examples/1.o
 EXAMPLES = examples/1

@@ -37,7 +37,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 #ifndef PERROR
 #include <stdio.h>
 
@@ -50,21 +50,28 @@ extern "C" {
 #define PRINTF_ERROR(n, ...) fprintf(stderr, n, ##__VA_ARGS__)
 #endif
 
-#define THROWN (_try_error)
-
+/* Exception numbers */
+#define EXNONE 0
+#define EXUNSPECIFIED -1
+#define EXC -2
+    
 #define TRY \
     { \
-	int _try_error=-1; char *_failed_cond = NULL; \
+	int _try_error=EXUNSPECIFIED; char *_failed_cond = NULL; \
 	do {
 
 #define EXCEPT \
-	    _try_error=0; \
+	    _try_error=EXNONE; \
 	} while(0); \
-	if (_try_error != 0) { \
+	if (_try_error != EXNONE) { \
 
 #define ETRY \
 	} \
     } \
+
+#define THROWN (_try_error)
+    
+#define CATCH(n) if(_try_error == (n))
 
 #ifdef DEBUG
 
@@ -101,12 +108,10 @@ extern "C" {
 #define THROW_IFNEG(n,e) THROW_IF((n) < 0,e)
 #define THROW_IFNULL(n,e) THROW_IF((n) == NULL,e)
 
-#define CERROR -2
-
-#define CTHROW_IF(n) THROW_IF(n,CERROR)
-#define CTHROW_UNLESS(n) THROW_UNLESS(n,CERROR)
-#define CTHROW_NEG(n) THROW_IFNEG(n,CERROR)
-#define CTHROW_NULL(n) THROW_IFNULL(n,CERROR)
+#define CTHROW_IF(n) THROW_IF(n,EXC)
+#define CTHROW_UNLESS(n) THROW_UNLESS(n,EXC)
+#define CTHROW_NEG(n) THROW_IFNEG(n,EXC)
+#define CTHROW_NULL(n) THROW_IFNULL(n,EXC)
 
 #define _SIMEX_H_STR_HELPER(x) #x
 #define _SIMEX_H_STR(x) _SIMEX_H_STR_HELPER(x)
@@ -118,7 +123,7 @@ extern "C" {
 	if (_failed_cond == NULL) { \
 	    _failed_cond = "No error condition for exception, thrown to " __FILE__ ":" _SIMEX_H_STR(__LINE__); \
 	}\
-	if (_try_error == CERROR) { \
+	if (_try_error == EXC) { \
 	    PERROR(_failed_cond); \
 	} else {\
 	    PRINTF_ERROR("%s: %s\n", _failed_cond, e);\
